@@ -400,6 +400,7 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 
 	void modificar() {
 
+		// copiar de adicionar y guiarse de la foto q tome
 	}
 
 	void eliminar() {
