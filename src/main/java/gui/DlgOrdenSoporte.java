@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -59,7 +60,6 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 	public final static int ELIMINAR = 3;
 	private JButton btnListar;
 	private JTextArea txtSalida;
-		
 
 	/**
 	 * Launch the application.
@@ -86,7 +86,7 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 		setTitle("Mantenimiento | Orden Soporte");
 		setBounds(100, 100, 810, 604);
 		getContentPane().setLayout(null);
-		
+
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -178,17 +178,17 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 		txtFechaRegistro.setBounds(175, 140, 146, 26);
 		getContentPane().add(txtFechaRegistro);
 		txtFechaRegistro.setColumns(10);
-		
+
 		txtMonto = new JTextField();
 		txtMonto.setEditable(false);
 		txtMonto.setColumns(10);
 		txtMonto.setBounds(175, 116, 86, 23);
 		getContentPane().add(txtMonto);
-		
+
 		lblCliente = new JLabel("Cliente :");
 		lblCliente.setBounds(10, 90, 149, 23);
 		getContentPane().add(lblCliente);
-		
+
 		cboClientes = new JComboBox<Object>();
 		cboClientes.setEnabled(false);
 		cboClientes.setBounds(174, 88, 251, 26);
@@ -196,7 +196,9 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 
 		habilitarEntradas(false);
 		habilitarBotones(true);
-		cargarComboBoxActividad();
+
+		cargarTecnicos();
+		cargarClientes();
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
@@ -269,26 +271,57 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 		txtNroOrdenSoporte.requestFocus();
 	}
 
-	void cargarComboBoxActividad() {
+	void cargarTecnicos() {
+
+		EntityManager manager = JPAUtil.getEntityManager();
+		String jpql = "select t from Tecnico t";
+
+		try {
+
+			List<Tecnico> lstTecnicos = manager.createQuery(jpql, Tecnico.class).getResultList();
+
+			for (Tecnico tecnico : lstTecnicos)
+				cboTecnicos.addItem(tecnico);
+
+		} finally {
+			manager.close();
+		}
 
 	}
 
+	void cargarClientes() {
+		EntityManager manager = JPAUtil.getEntityManager();
+		String jpql = "select c from Cliente c";
+
+		try {
+
+			List<Cliente> lstClientes = manager.createQuery(jpql, Cliente.class).getResultList();
+
+			for (Cliente cliente : lstClientes)
+				cboClientes.addItem(cliente);
+
+		} finally {
+			manager.close();
+		}
+	}
+
 	void listar() {
-		
+
 		EntityManager manager = JPAUtil.getEntityManager();
 		String jpql = "select o from OrdenSoporte o";
-		
+
 		try {
-			
+
 			List<OrdenSoporte> lstOrdenes = manager.createQuery(jpql, OrdenSoporte.class).getResultList();
-			
+
 			for (OrdenSoporte ordenSoporte : lstOrdenes) {
 				Tecnico tecnico = ordenSoporte.getTecnico();
 				Cliente cliente = ordenSoporte.getCliente();
 
 				imprimir("Nro de orde ...........: " + ordenSoporte.getNroOrden());
 				imprimir("Fecha de registro .....: " + ordenSoporte.getFechaRegistro());
-				imprimir("Técnico ...............: " + tecnico.getNombre() + " especialista en " + tecnico.getEspecialidadDescripcion());
+				imprimir("Técnico ...............: " + tecnico.getNombre() + " especialista en "
+						+ tecnico.getEspecialidadDescripcion());
 				imprimir("Cliente ...............: " + cliente.getRuc() + " - " + cliente.getRazonSocial());
 				imprimir("Monto .................: " + " S/. " + ordenSoporte.getMonto());
 				imprimir("Detalle incidencia ....: " + ordenSoporte.getDetalleIncidencia());
@@ -296,14 +329,14 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 				imprimir("");
 
 			}
-			
+
 		} finally {
 			manager.close();
 		}
 	}
 
 	void adicionar() {
-		
+
 	}
 
 	void consultar() {
@@ -357,7 +390,7 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 	void mensajeInfo(String msj) {
 		mensaje(msj, "INFO", JOptionPane.INFORMATION_MESSAGE);
 	}
-	
+
 	void mensajeAdvertencia(String msj) {
 		mensaje(msj, "ADVERTENCIA", JOptionPane.WARNING_MESSAGE);
 	}

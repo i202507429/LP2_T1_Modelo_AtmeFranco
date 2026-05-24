@@ -38,4 +38,9 @@ public class Tecnico {
 		}
 	}
 	
+	//  el @Data ya incluye el toString
+	public String toString() {
+		return nombre;
+	}
+	
 }
