@@ -401,6 +401,33 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 	void modificar() {
 
 		// copiar de adicionar y guiarse de la foto q tome
+		
+		Integer nroOrden = Integer.parseInt(txtNroOrdenSoporte.getText());
+		String DetalleIncidencia = txtDetalleIncidencia.getText();
+		Tecnico tecnico = (Tecnico) cboTecnicos.getSelectedItem();
+		Cliente cliente = (Cliente) cboClientes.getSelectedItem();
+		Double monto = Double.parseDouble(txtMonto.getText());
+		
+		EntityManager manager = JPAUtil.getEntityManager();
+		
+		try {
+			
+			OrdenSoporte ordenSoporte = new OrdenSoporte(nroOrden, null, tecnico, cliente, monto, DetalleIncidencia);
+			
+			manager.getTransaction().begin();
+			manager.merge(ordenSoporte);
+			manager.getTransaction().commit();
+			
+			mensajeInfo("Orden de soporte actualizada");
+			limpiar();
+			
+		} catch (Exception e) {
+			mensajeError("Hubo un error en la transaccion");
+			e.printStackTrace();
+		} finally {
+			manager.close();
+		}
+		
 	}
 
 	void eliminar() {
