@@ -391,6 +391,7 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 			txtMonto.setText(ordenSoporte.getMonto() + "");
 			txtFechaRegistro.setText(ordenSoporte.getFechaRegistro() + "");
 			
+			habilitarOk();
 			
 		} finally {
 			manager.close();
@@ -412,7 +413,19 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 		
 		try {
 			
-			OrdenSoporte ordenSoporte = new OrdenSoporte(nroOrden, null, tecnico, cliente, monto, DetalleIncidencia);
+			// Buscar el objeto existente en lugar de crear uno nuevo
+	        OrdenSoporte ordenSoporte = manager.find(OrdenSoporte.class, nroOrden);
+
+	        if (ordenSoporte == null) {
+	            mensajeAdvertencia("Orden de soporte no encontrada");
+	            return;
+	        }
+
+	        // Actualizar solo los campos necesarios (la fecha se conserva)
+	        ordenSoporte.setDetalleIncidencia(DetalleIncidencia);
+	        ordenSoporte.setTecnico(tecnico);
+	        ordenSoporte.setCliente(cliente);
+	        ordenSoporte.setMonto(monto);
 			
 			manager.getTransaction().begin();
 			manager.merge(ordenSoporte);
@@ -432,6 +445,40 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 
 	void eliminar() {
 
+		Integer nroOrden = Integer.parseInt(txtNroOrdenSoporte.getText());
+
+	    EntityManager manager = JPAUtil.getEntityManager();
+
+	    try {
+	        OrdenSoporte ordenSoporte = manager.find(OrdenSoporte.class, nroOrden);
+
+	        if (ordenSoporte == null) {
+	            mensajeAdvertencia("Orden de soporte no encontrada");
+	            return;
+	        }
+
+	        // Confirmación antes de eliminar
+	        int confirmacion = JOptionPane.showConfirmDialog(this,
+	                "¿Está seguro de eliminar la orden Nro " + nroOrden + "?",
+	                "CONFIRMAR ELIMINACIÓN",
+	                JOptionPane.YES_NO_OPTION);
+
+	        if (confirmacion == JOptionPane.YES_OPTION) {
+	            manager.getTransaction().begin();
+	            manager.remove(ordenSoporte);
+	            manager.getTransaction().commit();
+
+	            mensajeInfo("Orden de soporte eliminada correctamente");
+	            limpiar();
+	        }
+
+	    } catch (Exception e) {
+	        mensajeError("Hubo un error en la transaccion");
+	        e.printStackTrace();
+	    } finally {
+	        manager.close();
+	    }
+		
 	}
 
 	// M�todos tipo void (con par�metros)
